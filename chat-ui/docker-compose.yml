@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  # The frontend
+  chat-ui:
+    image: chat-ui
+    ports:
+      - "3000:3000"
+    environment:
+       - MONGODB_URL=mongodb://mongo-chatui:27017
+    container_name: chatui
+    restart: always # Ensuring service always restarts on failure
+  # The database where the history and context are going to be stored
+  mongo-chatui:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    container_name: mongo-chatui
+    restart: always # Ensuring service always restarts on failure

@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  text-generation:
+    image: ghcr.io/huggingface/text-generation-inference:1.0.3
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN}
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/data
+    command:
+      - "--model-id"
+      - "${MODEL_ID:-TheBloke/WizardCoder-Python-13B-V1.0-GPTQ}"
+      - "--quantize"
+      - "${QUANTIZE:-gptq}"
+      - "--max-batch-prefill-tokens=${MAX_BATCH_PREFILL_TOKENS:-2048}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+    container_name: text-generation
+    restart: always # Ensuring service always restarts on failure
+  # The actual ui
+  chat-ui:
+    image: chat-ui
+    ports:
+      - "3000:3000"
+    environment:
+       - MONGODB_URL=mongodb://mongo-chatui:27017
+    container_name: chatui
+    restart: always # Ensuring service always restarts on failure
+  # The database where the history and context are going to be stored
+  mongo-chatui:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    container_name: mongo-chatui
+    restart: always # Ensuring service always restarts on failure
+  # The reverse proxy
+  nginx:
+    container_name: nginx
+    restart: unless-stopped
+    image: nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./certificates:/lego_ssl

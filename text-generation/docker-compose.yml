@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  text-generation:
+    image: ghcr.io/huggingface/text-generation-inference:1.0.3
+    environment:
+      HUGGING_FACE_HUB_TOKEN: ${HUGGING_FACE_HUB_TOKEN}
+    ports:
+      - "8080:80"
+    volumes:
+      - ./data:/data
+    command:
+      - "--model-id"
+      - "${MODEL_ID:-TheBloke/WizardCoder-Python-13B-V1.0-GPTQ}"
+      - "--quantize"
+      - "${QUANTIZE:-gptq}"
+      - "--max-batch-prefill-tokens=${MAX_BATCH_PREFILL_TOKENS:-2048}"
+    deploy:
+      resources:
+        reservations:
+          devices:
+          - driver: nvidia
+            count: all
+            capabilities: [gpu]
+    container_name: text-generation
+    restart: always # Ensuring service always restarts on failure
