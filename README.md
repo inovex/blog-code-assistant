@@ -35,7 +35,7 @@ sudo docker run \
 goacme/lego --email you@example.com --dns designate --domains www.example.com,api.example.com --accept-tos run
 ```
 
-Now you can start the [docker-compose.ym](text-generation-chat-ui-ssl/docker-compose.yml) with:
+Now you can start the [docker-compose.yml](text-generation-chat-ui-ssl/docker-compose.yml) with:
 
 ```bash
 sudo docker compose up -d
